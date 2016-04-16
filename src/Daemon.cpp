@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include <iostream>
 
@@ -15,12 +16,26 @@ sigHandler(int sig)
 {
 	Daemon::instance()->reporter().log(Log::Sig, "Caught Signal [" + std::string(strsignal(sig)) + "]");
 	Daemon::instance()->reporter().log(Log::Info, "Quitting.");
+	close(Daemon::instance()->lock());
+	remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
 	exit(EXIT_SUCCESS);
 }
 
 // Ctors
 Daemon::Daemon()
 {
+	_reporter.log(Log::Info, "Started.");
+
+	_lock = open("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock", O_CREAT, 0666);
+	if (flock(_lock, LOCK_EX) < 0)
+	{
+		perror("flock");
+		close(_lock);
+		_reporter.log(Log::Error, "File locked.");
+		_reporter.log(Log::Info, "Quitting.");
+		exit(EXIT_FAILURE);
+	}
+
 	if ((_sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		_reporter.log(Log::Error, "Could not create socket.");
@@ -34,23 +49,22 @@ Daemon::Daemon()
 
 	if (bind(_sockfd, (struct sockaddr*)&_sAddr, sizeof(struct sockaddr)) < 0)
 	{
-		// _reporter.log(Log::Error, "Could not bind socket.");
+		_reporter.log(Log::Error, "Could not bind socket.");
+		close(_lock);
+		remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
 		exit(-2);
 	}
 	if (listen(_sockfd, 3) < 0)
 	{
 		_reporter.log(Log::Error, "Could not listen to port.");
+		close(_lock);
+		remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
 		exit(-3);
 	}
 
 	for (int i = 1; i <= 31; i++)
 		signal(i, &sigHandler);
 
-	// if matt_daemon.lock
-	// 	exit(EXIT_SUCCESS)
-	// create matt_daemon.lock
-
-	_reporter.log(Log::Info, "Started.");
 	_running = false;
 }
 
@@ -154,6 +168,8 @@ Daemon::handleIO()
 				{
 					_reporter.log(Log::Info, "Quit request.");
 					_reporter.log(Log::Info, "Quitting.");
+					close(_lock);
+					remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
 					exit(EXIT_SUCCESS);
 				}
 				buf[n] = 0;
@@ -178,6 +194,7 @@ Daemon::operator=(const Daemon& rhs)
 	_tv = rhs._tv;
 	_running = rhs._running;
 	_reporter = rhs._reporter;
+	_lock = rhs._lock;
 	return *this;
 }
 
@@ -191,4 +208,6 @@ Daemon::~Daemon()
 			close(_clients[i]);
 	}
 	close(_sockfd);
+	close(_lock);
+	remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
 }

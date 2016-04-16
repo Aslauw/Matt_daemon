@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <fstream>
 
 #include "TintinReporter.hpp"
 
@@ -13,8 +14,9 @@ public:
 	Daemon();
 	Daemon(const Daemon& rhs);
 
-	TintinReporter&		reporter() { return _reporter; }
-	static Daemon*		instance() { _instance = (!_instance) ? new Daemon : _instance; return _instance; }
+	TintinReporter&		reporter()	{ return _reporter; }
+	int					lock()		{ return _lock; }
+	static Daemon*		instance()	{ _instance = (!_instance) ? new Daemon : _instance; return _instance; }
 
 	void				resetServer();
 	void				runServer();
@@ -37,6 +39,7 @@ private:
 	struct timeval			_tv;
 	bool					_running;
 	TintinReporter			_reporter;
+	int						_lock;
 
 	static Daemon*			_instance;
 };

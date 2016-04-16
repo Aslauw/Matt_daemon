@@ -23,6 +23,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	@printf "$(GRAY)Creating $(RED)$(NAME)$(NO_COLOR)"
 	@$(CXX) $(LDFLAGS) $(OBJ) -o $(NAME)
+	@chmod 700 $(NAME)
 	@if [ -a $(NAME) ] ; \
 	then \
 		printf "\e[42G$(GREEN)✓$(NO_COLOR)\n" ; \

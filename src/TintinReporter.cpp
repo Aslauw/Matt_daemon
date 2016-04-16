@@ -4,7 +4,7 @@
 // Ctors
 TintinReporter::TintinReporter()
 {
-	_log.open("/nfs/2013/l/lbinet/Projects/C++/Daemon/var/log/matt_daemon/matt_daemon.log", std::ios::out | std::ios::app);
+	_log.open("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/log/matt_daemon/matt_daemon.log", std::ios::out | std::ios::app);
 }
 
 TintinReporter::TintinReporter(const TintinReporter& rhs)
@@ -58,6 +58,7 @@ TintinReporter::operator=(const TintinReporter& rhs)
 	_log.copyfmt(rhs._log);
 	_log.clear(rhs._log.rdstate());
 	_log.basic_ios<char>::rdbuf(rhs._log.rdbuf());
+	_time = rhs._time;
 	return *this;
 }
 
