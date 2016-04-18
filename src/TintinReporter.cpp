@@ -1,10 +1,11 @@
 #include "TintinReporter.hpp"
 #include <iostream>
+#include <string.h>
 
 // Ctors
 TintinReporter::TintinReporter()
 {
-	_log.open("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/log/matt_daemon/matt_daemon.log", std::ios::out | std::ios::app);
+	_log.open("./var/log/matt_daemon/matt_daemon.log", std::ios::out | std::ios::app);
 }
 
 TintinReporter::TintinReporter(const TintinReporter& rhs)
@@ -19,7 +20,7 @@ TintinReporter::timeStamp()
 	char		strtime[65];
 	struct tm*	timeinfo;
 
-	std::memset(strtime, 0, 65);
+	memset(strtime, 0, 65);
 	_time = std::time(nullptr);
 	timeinfo = localtime(&_time);
 	strftime(strtime, 64, "[%d/%m/%Y-%H:%M:%S]", timeinfo);
@@ -33,9 +34,12 @@ TintinReporter::log(Log type, std::string msg)
 	std::string logMsg;
 
 
-	msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
+//	msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
+	if (!msg.empty() && msg[msg.length() - 1] == '\n')
+		msg.erase(msg.length() - 1);
+	
 	if (!_log.is_open())
-		_log.open("/nfs/2013/l/lbinet/Projects/C++/Daemon/var/log/matt_daemon/matt_daemon.log", std::ios::out | std::ios::app);
+		_log.open("./var/log/matt_daemon/matt_daemon.log", std::ios::out | std::ios::app);
 
 	if (type == Log::Info)
 		logType = " [INFO]  ";

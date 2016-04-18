@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/file.h>
 
 #include <iostream>
 
@@ -17,7 +18,7 @@ sigHandler(int sig)
 	Daemon::instance()->reporter().log(Log::Sig, "Caught Signal [" + std::string(strsignal(sig)) + "]");
 	Daemon::instance()->reporter().log(Log::Info, "Quitting.");
 	close(Daemon::instance()->lock());
-	remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
+	remove("/var/lock/matt_daemon.lock");
 	exit(EXIT_SUCCESS);
 }
 
@@ -26,10 +27,9 @@ Daemon::Daemon()
 {
 	_reporter.log(Log::Info, "Started.");
 
-	_lock = open("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock", O_CREAT, 0666);
-	if (flock(_lock, LOCK_EX) < 0)
+	_lock = open("/var/lock/matt_daemon.lock", O_CREAT, 0666);
+	if (flock(_lock, LOCK_EX | LOCK_NB) < 0)
 	{
-		perror("flock");
 		close(_lock);
 		_reporter.log(Log::Error, "File locked.");
 		_reporter.log(Log::Info, "Quitting.");
@@ -51,14 +51,14 @@ Daemon::Daemon()
 	{
 		_reporter.log(Log::Error, "Could not bind socket.");
 		close(_lock);
-		remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
+		remove("/var/lock/matt_daemon.lock");
 		exit(-2);
 	}
 	if (listen(_sockfd, 3) < 0)
 	{
 		_reporter.log(Log::Error, "Could not listen to port.");
 		close(_lock);
-		remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
+		remove("/var/lock/matt_daemon.lock");
 		exit(-3);
 	}
 
@@ -169,7 +169,7 @@ Daemon::handleIO()
 					_reporter.log(Log::Info, "Quit request.");
 					_reporter.log(Log::Info, "Quitting.");
 					close(_lock);
-					remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
+					remove("/var/lock/matt_daemon.lock");
 					exit(EXIT_SUCCESS);
 				}
 				buf[n] = 0;
@@ -209,5 +209,5 @@ Daemon::~Daemon()
 	}
 	close(_sockfd);
 	close(_lock);
-	remove("/nfs/2013/l/lbinet/Projects/C++/Matt_daemon/var/lock/matt_daemon.lock");
+	remove("/var/lock/matt_daemon.lock");
 }
