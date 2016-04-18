@@ -26,6 +26,7 @@ $(NAME): $(OBJ)
 	@$(CXX) $(LDFLAGS) $(OBJ) -o $(NAME)
 	@if [ -f $(NAME) ] ; \
 	then \
+		chmod 700 $(NAME) ; \
 		printf "$(GREEN) ✓$(NO_COLOR)\n" ; \
 	fi;
 
