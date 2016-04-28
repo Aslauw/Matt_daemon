@@ -144,6 +144,7 @@ Daemon::newConnection()
 	{
 		_reporter.log(Log::Error, "No place for new connection.");
 		close(_newfd);
+		return;
 	}
 	_reporter.log(Log::Info, "Connection accepted.");
 }
