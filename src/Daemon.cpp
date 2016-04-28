@@ -28,6 +28,10 @@ Daemon::Daemon()
 	if (getuid() != 0)
 		exit(EXIT_FAILURE);
 
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
+
 	_reporter.log(Log::Info, "Started.");
 
 	_lock = open("/var/lock/matt_daemon.lock", O_CREAT, 0666);

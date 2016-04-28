@@ -30,10 +30,6 @@ main()
 	if ((chdir("/")) < 0)
 			exit(EXIT_FAILURE);
 
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
-
 	Daemon::instance()->runServer();
 
 	exit(EXIT_SUCCESS);
