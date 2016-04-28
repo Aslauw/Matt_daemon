@@ -167,7 +167,7 @@ Daemon::handleIO()
 			}
 			else
 			{
-				if (strncmp(buf, "quit", 4) == 0)
+				if (strcmp(buf, "quit") == 0 || strcmp(buf, "quit\n") == 0)
 				{
 					_reporter.log(Log::Info, "Quit request.");
 					_reporter.log(Log::Info, "Quitting.");
