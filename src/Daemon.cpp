@@ -25,6 +25,9 @@ sigHandler(int sig)
 // Ctors
 Daemon::Daemon()
 {
+	if (getuid() != 0)
+		exit(EXIT_FAILURE);
+
 	_reporter.log(Log::Info, "Started.");
 
 	_lock = open("/var/lock/matt_daemon.lock", O_CREAT, 0666);

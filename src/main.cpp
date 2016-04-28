@@ -31,8 +31,8 @@ main()
 			exit(EXIT_FAILURE);
 
 	close(STDIN_FILENO);
-	// close(STDOUT_FILENO);
-	// close(STDERR_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
 
 	Daemon::instance()->runServer();
 
